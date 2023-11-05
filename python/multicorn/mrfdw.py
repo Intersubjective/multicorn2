@@ -13,11 +13,11 @@ class MeritrankFdw(ForeignDataWrapper):
 
     def execute(self, quals, columns, sortkeys=None):
         quals_tuple = tuple((q.field_name, q.operator, q.value) for q in quals)
-        msg = msgpack.dumps((quals_tuple, columns))
+        msg = msgpack.dumps((quals_tuple, tuple(columns)))
 
         with pynng.Req0() as sock:
             sock.dial(self.url)
-            sock.send_msg(msg)
+            sock.send(msg)
             resp = sock.recv_msg()
             for row in msgpack.loads(resp.bytes):
                 yield row
